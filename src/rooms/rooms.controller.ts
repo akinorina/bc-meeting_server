@@ -51,4 +51,26 @@ export class RoomsController {
   remove(@Param('id') id: string) {
     return this.roomsService.remove(+id);
   }
+
+  // Roomへ入室し、入室メンバーのデータを取得
+  @Roles([ERoles.User])
+  @Post('enter')
+  async enter(
+    @Request() req: any,
+    @Body('room_hash') room_hash: string,
+    @Body('peer_id') peer_id: string,
+  ) {
+    return await this.roomsService.enter(req, room_hash, peer_id);
+  }
+
+  // Roomから退室
+  @Roles([ERoles.User])
+  @Post('exit')
+  async exit(
+    @Request() req: any,
+    @Body('room_hash') room_hash: string,
+    @Body('peer_id') peer_id: string,
+  ) {
+    return await this.roomsService.exit(req, room_hash, peer_id);
+  }
 }
