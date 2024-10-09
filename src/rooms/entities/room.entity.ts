@@ -42,7 +42,7 @@ export class Room {
   @DeleteDateColumn({ comment: '削除日時' })
   deletedAt: string | undefined = undefined;
 
-  setValueByCreateRoomDto(createRoomDto: CreateRoomDto) {
-    this.room_name = createRoomDto.room_name;
-  }
+  // setValueByCreateRoomDto(createRoomDto: CreateRoomDto) {
+  //   this.room_name = createRoomDto.room_name;
+  // }
 }
