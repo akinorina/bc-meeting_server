@@ -37,6 +37,12 @@ export class RoomsController {
   }
 
   @Roles([ERoles.User])
+  @Get('hash/:room_hash')
+  findOneByRoomHash(@Request() req: any, @Param('room_hash') roomHash: string) {
+    return this.roomsService.findOneByRoomHash(req, roomHash);
+  }
+
+  @Roles([ERoles.User])
   @Put(':id')
   update(
     @Request() req: any,

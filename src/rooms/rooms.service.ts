@@ -66,6 +66,21 @@ export class RoomsService {
     }
   }
 
+  async findOneByRoomHash(req: any, roomHash: string) {
+    try {
+      const options: any = {
+        relations: { user: false, room_attenders: true },
+        where: { room_hash: roomHash },
+      };
+      if (req.user) {
+        options.where.user = { id: req.user.id };
+      }
+      return await this.roomRepository.findOneOrFail(options);
+    } catch (error) {
+      throw new HttpException('no such the Room data.', HttpStatus.NOT_FOUND);
+    }
+  }
+
   async update(req: any, id: number, updateRoomDto: UpdateRoomDto) {
     // Room
     const options: any = {
