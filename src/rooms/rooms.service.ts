@@ -69,7 +69,7 @@ export class RoomsService {
   async findOneByRoomHash(req: any, roomHash: string) {
     try {
       const options: any = {
-        relations: { user: false, room_attenders: true },
+        relations: { user: true, room_attenders: true },
         where: { room_hash: roomHash },
       };
       if (req.user) {
@@ -101,41 +101,25 @@ export class RoomsService {
     return this.roomRepository.softDelete(+id);
   }
 
-  // Room 入室API
-  async enter(req: any, roomHash: string, peer_id: string) {
-    // userId から User を検索
-    const targetUser = await this.userRepository.findOneByOrFail({
-      id: req.user.id,
-    });
-
-    // room_hash から Room　を検索
-    const targetRoom = await this.roomRepository.findOneOrFail({
-      relations: { room_attenders: true },
-      where: { room_hash: roomHash },
-    });
-
-    // 当該Roomに User を 出席者として追加
-    const roomAttender = new RoomAttender();
-    roomAttender.room = targetRoom;
-    roomAttender.attender = targetUser;
-    roomAttender.peer_id = peer_id;
-    await this.roomAttenderRepository.save(roomAttender);
+  // Room 状態取得
+  async statusRoom(roomHash: string) {
+    // console.log('roomHash', roomHash);
 
     // Roomの情報：現在の参加者一覧を取得して返す
     const res = await this.roomRepository.findOneOrFail({
-      relations: { user: true, room_attenders: { attender: true } },
+      relations: { user: true, room_attenders: true },
       where: { room_hash: roomHash },
     });
     // console.debug('res', res.room_attenders);
     const ret = {
       room_id: res.id,
       room_name: res.room_name,
+      room_hash: res.room_hash,
       attenders: null,
     };
     ret.attenders = res.room_attenders.map((item) => {
       return {
-        user_id: item.attender.id,
-        username: item.attender.username,
+        id: item.id,
         peer_id: item.peer_id,
       };
     });
@@ -144,52 +128,55 @@ export class RoomsService {
     return ret;
   }
 
-  // Room 退室API
-  async exit(req: any, roomHash: string, peer_id: string) {
-    // userId から User を検索
-    const targetUser = await this.userRepository.findOneByOrFail({
-      id: req.user.id,
+  // Room 入室API
+  async enter(roomHash: string, peer_id: string) {
+    // console.log('roomHash', roomHash);
+    // console.log('peer_id', peer_id);
+
+    // room_hash から Room　を検索
+    const targetRoom = await this.roomRepository.findOneOrFail({
+      relations: { room_attenders: true },
+      where: { room_hash: roomHash },
     });
-    // console.debug('targetUser', targetUser);
+    // console.log('targetRoom', targetRoom);
+
+    // 当該Roomに peer_id を 出席者として追加
+    const roomAttender = new RoomAttender();
+    roomAttender.room = targetRoom;
+    roomAttender.peer_id = peer_id;
+    await this.roomAttenderRepository.save(roomAttender);
+
+    return { status: 'success' };
+  }
+
+  // Room 退室API
+  async exit(roomHash: string, peer_id: string) {
+    console.log('roomHash', roomHash);
+    console.log('peer_id', peer_id);
 
     // room_hash から Room を検索
     const targetRoom = await this.roomRepository.findOneOrFail({
-      relations: { user: true, room_attenders: { attender: true } },
+      relations: { room_attenders: true },
       where: { room_hash: roomHash },
     });
-    // console.debug('targetRoom', targetRoom);
-    // console.debug('---');
-    // console.debug('room_attenders', targetRoom.room_attenders);
+    console.debug('targetRoom', targetRoom);
 
-    // Room から peer_id のユーザーを削除
+    // 当該Roomに peer_id を 出席者として追加
+
+    // // Room から peer_id のユーザーを削除
     const targetAttenderIdx = targetRoom.room_attenders.findIndex((item) => {
       return item.peer_id === peer_id;
     });
-    if (targetAttenderIdx < 0) {
-      // 該当入室者が無い場合
-      throw new HttpException(
-        'no such attender:' + peer_id,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    console.log('targetAttenderIdx', targetAttenderIdx);
+    if (targetAttenderIdx >= 0) {
+      // Room - 出席者 データの関係を削除
+      const targetAttender = targetRoom.room_attenders[targetAttenderIdx];
+      this.roomAttenderRepository.delete(targetAttender.id);
 
-    // Room - 出席者 データの関係を削除
-    const targetAttender = targetRoom.room_attenders[targetAttenderIdx];
-    // console.debug('---');
-    // console.debug('targetAttender', targetAttender);
-    // console.debug('>>', targetAttender.attender.id === targetUser.id);
-    if (targetAttender.attender.id !== targetUser.id) {
-      // 退出者とデータとが不一致 => エラー
-      throw new HttpException(
-        'differ the user against attender.',
-        HttpStatus.BAD_REQUEST,
-      );
+      // // 出席者データ削除
+      // targetRoom.room_attenders.splice(targetAttenderIdx, 1);
+      // this.roomRepository.save(targetRoom);
     }
-    this.roomAttenderRepository.softDelete(targetAttender.id);
-
-    // 出席者データ削除
-    targetRoom.room_attenders.splice(targetAttenderIdx, 1);
-    this.roomRepository.save(targetRoom);
 
     return { status: 'success' };
   }

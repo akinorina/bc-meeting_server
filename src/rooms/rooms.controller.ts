@@ -13,6 +13,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { ERoles } from 'src/enumerates/roles.enum';
 import { Roles } from 'src/decorators/roles.decorator';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('rooms')
 export class RoomsController {
@@ -58,25 +59,30 @@ export class RoomsController {
     return this.roomsService.remove(+id);
   }
 
+  // Room 入室状態を取得
+  @Public()
+  @Get('status/:room_hash')
+  statusRoom(@Param('room_hash') roomHash: string) {
+    return this.roomsService.statusRoom(roomHash);
+  }
+
   // Roomへ入室し、入室メンバーのデータを取得
-  @Roles([ERoles.User])
+  @Public()
   @Post('enter')
   async enter(
-    @Request() req: any,
     @Body('room_hash') room_hash: string,
     @Body('peer_id') peer_id: string,
   ) {
-    return await this.roomsService.enter(req, room_hash, peer_id);
+    return await this.roomsService.enter(room_hash, peer_id);
   }
 
   // Roomから退室
-  @Roles([ERoles.User])
+  @Public()
   @Post('exit')
   async exit(
-    @Request() req: any,
     @Body('room_hash') room_hash: string,
     @Body('peer_id') peer_id: string,
   ) {
-    return await this.roomsService.exit(req, room_hash, peer_id);
+    return await this.roomsService.exit(room_hash, peer_id);
   }
 }

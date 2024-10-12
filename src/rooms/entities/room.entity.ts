@@ -13,7 +13,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { CreateRoomDto } from '../dto/create-room.dto';
 import { RoomAttender } from './room_attender.entity';
 
 @Entity()
@@ -21,14 +20,14 @@ export class Room {
   @PrimaryGeneratedColumn({ comment: 'ID' })
   id: number = 0;
 
-  @Column({ default: '', comment: 'hash', unique: true })
-  room_hash: string = '';
-
-  @Column({ default: '', comment: 'ROOM名' })
-  room_name: string = '';
-
   @ManyToOne(() => User, (user) => user.rooms)
   user: User;
+
+  @Column({ default: '', comment: 'Room 名' })
+  room_name: string = '';
+
+  @Column({ default: '', comment: 'Room hash', unique: true })
+  room_hash: string = '';
 
   @OneToMany(() => RoomAttender, (room_attender) => room_attender.room)
   room_attenders: RoomAttender[];
@@ -41,8 +40,4 @@ export class Room {
 
   @DeleteDateColumn({ comment: '削除日時' })
   deletedAt: string | undefined = undefined;
-
-  // setValueByCreateRoomDto(createRoomDto: CreateRoomDto) {
-  //   this.room_name = createRoomDto.room_name;
-  // }
 }

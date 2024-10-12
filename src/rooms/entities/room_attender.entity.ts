@@ -12,7 +12,6 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Room } from './room.entity';
-import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class RoomAttender {
@@ -21,9 +20,6 @@ export class RoomAttender {
 
   @ManyToOne(() => Room, (room) => room.room_attenders)
   room: Room;
-
-  @ManyToOne(() => User, (user) => user.room_attenders)
-  attender: User;
 
   @Column({ default: '', comment: 'hash' })
   peer_id: string = '';
