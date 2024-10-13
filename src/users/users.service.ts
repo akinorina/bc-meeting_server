@@ -174,7 +174,7 @@ export class UsersService {
     await this.transporter.sendMail({
       from: configuration().app.system.email_address,
       to: configuration().app.admin.email_address,
-      subject: 'Webapp4 ユーザー登録',
+      subject: 'vc-contact ユーザー登録',
       text: toAdminText,
       html: toAdminHtml,
     });
@@ -192,7 +192,7 @@ export class UsersService {
     await this.transporter.sendMail({
       from: configuration().app.system.email_address,
       to: savedData.email,
-      subject: 'Webapp4 ユーザー登録',
+      subject: 'vc-contact ユーザー登録',
       text: touserText,
       html: toUserHtml,
     });
