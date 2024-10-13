@@ -20,6 +20,8 @@ import { Image } from '../../images/entities/image.entity';
 import { Blog } from '../../blogs/entities/blog.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { VerifyingEmail } from './verify-email.entity';
+import { Room } from '../../rooms/entities/room.entity';
+// import { RoomAttender } from '../../rooms/entities/room_attender.entity';
 
 @Entity()
 export class User {
@@ -60,6 +62,12 @@ export class User {
   @OneToOne(() => VerifyingEmail)
   @JoinColumn()
   verifying_email: VerifyingEmail;
+
+  @OneToMany(() => Room, (room) => room.user)
+  rooms: Room[];
+
+  // @OneToMany(() => RoomAttender, (room_attender) => room_attender.attender)
+  // room_attenders: RoomAttender[];
 
   @CreateDateColumn({ comment: '作成日時' })
   createdAt: string | undefined = undefined;
