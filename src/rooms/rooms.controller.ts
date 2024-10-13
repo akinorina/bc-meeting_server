@@ -31,13 +31,13 @@ export class RoomsController {
     return this.roomsService.findAll(req);
   }
 
-  @Roles([ERoles.User])
+  @Public()
   @Get(':id')
   findOne(@Request() req: any, @Param('id') id: string) {
     return this.roomsService.findOne(req, +id);
   }
 
-  @Roles([ERoles.User])
+  @Public()
   @Get('hash/:room_hash')
   findOneByRoomHash(@Request() req: any, @Param('room_hash') roomHash: string) {
     return this.roomsService.findOneByRoomHash(req, roomHash);
