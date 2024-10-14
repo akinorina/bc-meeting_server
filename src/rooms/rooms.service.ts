@@ -151,15 +151,11 @@ export class RoomsService {
 
   // Room 退室API
   async exit(roomHash: string, peer_id: string) {
-    console.log('roomHash', roomHash);
-    console.log('peer_id', peer_id);
-
     // room_hash から Room を検索
     const targetRoom = await this.roomRepository.findOneOrFail({
       relations: { room_attenders: true },
       where: { room_hash: roomHash },
     });
-    console.debug('targetRoom', targetRoom);
 
     // 当該Roomに peer_id を 出席者として追加
 
@@ -167,7 +163,6 @@ export class RoomsService {
     const targetAttenderIdx = targetRoom.room_attenders.findIndex((item) => {
       return item.peer_id === peer_id;
     });
-    console.log('targetAttenderIdx', targetAttenderIdx);
     if (targetAttenderIdx >= 0) {
       // Room - 出席者 データの関係を削除
       const targetAttender = targetRoom.room_attenders[targetAttenderIdx];
