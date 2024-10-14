@@ -130,9 +130,6 @@ export class RoomsService {
 
   // Room 入室API
   async enter(roomHash: string, peer_id: string) {
-    // console.log('roomHash', roomHash);
-    // console.log('peer_id', peer_id);
-
     // room_hash から Room　を検索
     const targetRoom = await this.roomRepository.findOneOrFail({
       relations: { room_attenders: true },
@@ -140,11 +137,17 @@ export class RoomsService {
     });
     // console.log('targetRoom', targetRoom);
 
-    // 当該Roomに peer_id を 出席者として追加
-    const roomAttender = new RoomAttender();
-    roomAttender.room = targetRoom;
-    roomAttender.peer_id = peer_id;
-    await this.roomAttenderRepository.save(roomAttender);
+    // Room に peer_id が既に登録済みか確認
+    const res = await this.roomAttenderRepository.findOne({
+      where: { peer_id: peer_id },
+    });
+    if (res === null) {
+      // 当該Roomに peer_id を 出席者として追加
+      const roomAttender = new RoomAttender();
+      roomAttender.room = targetRoom;
+      roomAttender.peer_id = peer_id;
+      await this.roomAttenderRepository.save(roomAttender);
+    }
 
     return { status: 'success' };
   }
