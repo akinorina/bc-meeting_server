@@ -1,13 +1,22 @@
 import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
+import * as dayjs from 'dayjs';
+import * as nunjucks from 'nunjucks';
+import { createTransport, Transporter } from 'nodemailer';
+import configuration from 'src/config/configuration';
+import { SmtpConfig } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from './entities/room.entity';
 import { RoomAttender } from './entities/room_attender.entity';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import { InviteToRoomDto } from './dto/invite-to-room.dto';
 
 @Injectable()
 export class RoomsService {
+  smtpConfig: SmtpConfig;
+  transporter: Transporter;
+
   constructor(
     @Inject('ROOM_REPOSITORY')
     private roomRepository: Repository<Room>,
@@ -15,7 +24,10 @@ export class RoomsService {
     private roomAttenderRepository: Repository<RoomAttender>,
     @Inject('USER_REPOSITORY')
     private userRepository: Repository<User>,
-  ) {}
+  ) {
+    this.smtpConfig = configuration().smtp;
+    this.transporter = createTransport(this.smtpConfig);
+  }
 
   async create(req: any, createRoomDto: CreateRoomDto) {
     // User
@@ -99,6 +111,86 @@ export class RoomsService {
 
   async remove(id: number) {
     return this.roomRepository.softDelete(+id);
+  }
+
+  // Room への招待メールを送信
+  async inviteToRoom(req: any, inviteToRoom: InviteToRoomDto) {
+    // ユーザー情報取得
+    const targetUser = await this.userRepository.findOneByOrFail({
+      id: req.user.id,
+    });
+    // console.log('targetUser', targetUser);
+
+    // Room情報取得
+    const options: any = {
+      relations: { user: true },
+      where: { id: inviteToRoom.room_id },
+    };
+    if (req.user) {
+      options.where.user = { id: req.user.id };
+    }
+    const targetRoom = await this.roomRepository.findOneOrFail(options);
+    // console.log('targetRoom', targetRoom);
+
+    // メール送信情報
+    const mailOption = {
+      app_name: configuration().app.name,
+      mail_from: configuration().app.system.email_address,
+      mail_to: inviteToRoom.invite_email,
+      inviting_name: targetUser.familyname + targetUser.firstname,
+      invited_email: targetUser.email,
+      room_name: targetRoom.room_name,
+      room_hash: targetRoom.room_hash,
+      room_url: configuration().app.origin + '/room/' + targetRoom.room_hash,
+      url_origin: configuration().app.origin,
+      date: dayjs().format('YYYY-MM-DD'),
+    };
+    // console.log('mailOption', mailOption);
+
+    // メール作成
+    const toAdminText = nunjucks.render(
+      'invitation/invitation_email.to-admin.txt.njk',
+      mailOption,
+    );
+    const toAdminHtml = nunjucks.render(
+      'invitation/invitation_email.to-admin.html.njk',
+      mailOption,
+    );
+    // メール送信 to admin.
+    await this.transporter.sendMail({
+      from: configuration().app.system.email_address,
+      to: configuration().app.admin.email_address,
+      subject:
+        '[' + configuration().app.name + ']: 招待メールが送信されました。',
+      text: toAdminText,
+      html: toAdminHtml,
+    });
+
+    // メール作成
+    const toCustomerText = nunjucks.render(
+      'invitation/invitation_email.to-user.txt.njk',
+      mailOption,
+    );
+    const toCustomerHtml = nunjucks.render(
+      'invitation/invitation_email.to-user.html.njk',
+      mailOption,
+    );
+    // メール送信 to customer.
+    await this.transporter.sendMail({
+      from: configuration().app.system.email_address,
+      to: 'お客様 <' + mailOption.mail_to + '>',
+      subject:
+        '[' +
+        configuration().app.name +
+        ']: ' +
+        mailOption.inviting_name +
+        '様からの招待メールです。',
+      text: toCustomerText,
+      html: toCustomerHtml,
+    });
+
+    // 成功レスポンス
+    return { status: 'success' };
   }
 
   // Room 状態取得

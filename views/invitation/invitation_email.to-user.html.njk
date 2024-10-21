@@ -1,0 +1,58 @@
+<style>
+.myblock {
+  margin-bottom: 2rem;
+}
+.tbl {
+  margin: 1rem;
+}
+.tbl th {
+  text-align: left;
+}
+</style>
+
+<div class="myblock">
+  <div>お客様へ</div>
+  <div>Cc: {{inviting_name}}様</div>
+</div>
+
+<div class="myblock">
+  {{app_name}}へのご招待
+</div>
+
+<div class="myblock">
+  {{inviting_name}} 様からあなたへ、アプリ「{{app_name}}」への招待がありました。
+</div>
+
+<div class="myblock">
+  <div>アプリ「{{app_name}}」は、個人事業主「仲田明紀」（屋号: Bright Century）が開発したビデオミーティングシステムです。</div>
+  <div>お客様と {{inviting_name}} 様でのビデオ通話をご利用いただけます。</div>
+</div>
+
+<div class="myblock">
+  <table class="tbl">
+    <tr>
+      <th>ご招待Room 名称</th>
+      <td>{{room_name}}</td>
+    </tr>
+    <tr>
+      <th>ご招待Room URL</th>
+      <td><a href="{{room_url}}" target="_blank">{{room_url}}</a></td>
+    </tr>
+  </table>
+</div>
+
+<div class="myblock">
+  <div>上のURLで、ビデオ通話のアプリ画面を開きます。</div>
+</div>
+
+<div class="myblock">
+  <div>どうぞ、ご利用ください。</div>
+</div>
+
+<div class="myblock">
+  <div>{{ date }}</div>
+  <div><a href="{{url_origin}}">{{app_name}}</div>
+  <div><a href="mailto:info@bright-century.com">Bright Century 仲田明紀</a></div>
+</div>
+
+

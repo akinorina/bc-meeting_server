@@ -1,0 +1,37 @@
+<style>
+.myblock {
+  margin-bottom: 2rem;
+}
+.tbl {
+  margin: 1rem;
+}
+.tbl th {
+  text-align: left;
+}
+</style>
+
+<div class="myblock">
+  {{app_name}} システム管理者 様
+</div>
+
+<div class="myblock">
+  {{app_name}} へのユーザーのメールによる招待が行われました。
+</div>
+
+<div class="myblock">
+  <table class="tbl">
+  <tr><th>招待者 氏名       </th><td>{{inviting_name}}</td></tr>
+  <tr><th>招待先メールアドレス</th><td>{{mail_to}}</td></tr>
+  <tr><th>招待Room 名称     </th><td>{{room_name}}</td></tr>
+  <tr><th>招待Room hash    </th><td>{{room_hash}}</td></tr>
+  <tr><th>招待Room URL     </th><td><a href="{{room_url}}" target="_blank">{{room_url}}</a></td></tr>
+  </table>
+</div>
+
+<div class="myblock">
+  <div>{{ date }}</div>
+  <div><a href="{{url_origin}}">{{app_name}}</div>
+  <div><a href="mailto:info@bright-century.com">Bright Century 仲田明紀</a></div>
+</div>
+
+
