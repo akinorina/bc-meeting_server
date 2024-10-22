@@ -28,7 +28,7 @@ RUN npm ci --only=production
 
 RUN npm install pm2 -g
 
-EXPOSE 3000
+EXPOSE 3100
 
 ## nodeユーザーとして実行
 USER node
