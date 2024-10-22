@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'vc-contact_server',
+      name: 'bc-meeting_server',
       script: './dist/main.js',
       cwd: '.',
       max_memory_restart: '512M',
