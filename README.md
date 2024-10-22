@@ -1,4 +1,4 @@
-# vc-contact_server
+# bc-meeting_server
 ビデオ通話、チャットツール - Api Server
 
 <p align="center">

@@ -11,6 +11,7 @@ import {
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import { InviteToRoomDto } from './dto/invite-to-room.dto';
 import { ERoles } from 'src/enumerates/roles.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Public } from 'src/decorators/public.decorator';
@@ -57,6 +58,13 @@ export class RoomsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.roomsService.remove(+id);
+  }
+
+  // Room への招待メール送信
+  @Roles([ERoles.User])
+  @Post('send_invite_mail')
+  inviteFriend(@Request() req: any, @Body() inviteToRoom: InviteToRoomDto) {
+    return this.roomsService.inviteToRoom(req, inviteToRoom);
   }
 
   // Room 入室状態を取得
