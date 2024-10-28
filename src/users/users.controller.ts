@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { VerifyingEmailDto } from './dto/verifying-email.dto';
+import { CheckVerifyingEmailDto } from './dto/check-verifying-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { ERoles } from 'src/enumerates/roles.enum';
@@ -62,6 +63,12 @@ export class UsersController {
   @Post('verifing-email')
   verifyingEmail(@Body() verifyingEmailDto: VerifyingEmailDto) {
     return this.usersService.verifyingEmail(verifyingEmailDto);
+  }
+
+  @Public()
+  @Post('check_verifying_email')
+  checkVerifyingEmail(@Body() checkVerifyingEmailDto: CheckVerifyingEmailDto) {
+    return this.usersService.checkVerifyingEmail(checkVerifyingEmailDto);
   }
 
   @Public()
