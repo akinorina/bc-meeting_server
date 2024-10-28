@@ -7,8 +7,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { VerifyingEmailDto } from './dto/verifying-email.dto';
+import { CheckVerifyingEmailDto } from './dto/check-verifying-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { Repository, Raw } from 'typeorm';
+import { Repository, Raw, IsNull } from 'typeorm';
 import { User } from './entities/user.entity';
 import { VerifyingEmail } from './entities/verify-email.entity';
 import { Role } from 'src/roles/entities/role.entity';
@@ -105,6 +106,13 @@ export class UsersService {
   }
 
   async remove(id: number) {
+    const targetUser = await this.userRepository.findOneByOrFail({ id: id });
+
+    // email に日付を追記
+    targetUser.email =
+      targetUser.email + '-' + dayjs().format('YYYYMMDDHHmmss');
+    await this.userRepository.update(id, targetUser);
+
     return await this.userRepository.softDelete(id);
   }
 
@@ -204,13 +212,40 @@ export class UsersService {
     };
   }
 
+  async checkVerifyingEmail(checkVerifyingEmailDto: CheckVerifyingEmailDto) {
+    // check verifying email.
+    try {
+      await this.verifyingEmailRepository.findOneOrFail({
+        where: {
+          email: checkVerifyingEmailDto.email,
+          hash: checkVerifyingEmailDto.hash,
+          createdAt: Raw(
+            (cat) => `DATE_ADD(${cat}, INTERVAL 120 MINUTE) > NOW()`,
+          ),
+          verifiedEmailAt: IsNull(),
+        },
+        order: {
+          createdAt: 'DESC',
+          id: 'DESC',
+        },
+      });
+    } catch (error) {
+      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
+    }
+
+    return { result: 'valid' };
+  }
+
   async registerUser(createUserDto: CreateUserDto) {
     // Email, Hash値 照合
     const targetVerifyingEmail = await this.verifyingEmailRepository.findOne({
       where: {
         email: createUserDto.email,
         hash: createUserDto.email_hash,
-        createdAt: Raw((cat) => `DATE_ADD(${cat}, INTERVAL 2 DAY) > NOW()`),
+        createdAt: Raw(
+          (cat) => `DATE_ADD(${cat}, INTERVAL 120 MINUTE) > NOW()`,
+        ),
+        verifiedEmailAt: IsNull(),
       },
       order: {
         createdAt: 'DESC',
@@ -250,7 +285,10 @@ export class UsersService {
       where: {
         email: resetPasswordDto.email,
         hash: resetPasswordDto.hash,
-        createdAt: Raw((cat) => `DATE_ADD(${cat}, INTERVAL 2 DAY) > NOW()`),
+        createdAt: Raw(
+          (cat) => `DATE_ADD(${cat}, INTERVAL 120 MINUTE) > NOW()`,
+        ),
+        verifiedEmailAt: IsNull(),
       },
       order: {
         createdAt: 'DESC',
