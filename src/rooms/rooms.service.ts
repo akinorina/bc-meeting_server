@@ -222,6 +222,9 @@ export class RoomsService {
 
   // Room 入室API
   async enter(roomHash: string, peer_id: string) {
+    if (peer_id === '') {
+      throw new HttpException('no peer id.', HttpStatus.BAD_REQUEST);
+    }
     // room_hash から Room　を検索
     const targetRoom = await this.roomRepository.findOneOrFail({
       relations: { room_attenders: true },
