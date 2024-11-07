@@ -24,6 +24,9 @@ export class RoomAttender {
   @Column({ default: '', comment: 'hash' })
   peer_id: string = '';
 
+  @Column({ default: '', comment: '表示名' })
+  display_name: string = '';
+
   @CreateDateColumn({ comment: '作成日時' })
   createdAt: string | undefined = undefined;
 

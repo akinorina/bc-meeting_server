@@ -291,6 +291,7 @@ export class RoomsService {
       return {
         id: item.id,
         peer_id: item.peer_id,
+        display_name: item.display_name,
       };
     });
     // console.log('ret', ret);
@@ -299,7 +300,7 @@ export class RoomsService {
   }
 
   // Room 入室API
-  async enter(roomHash: string, peer_id: string) {
+  async enter(roomHash: string, peer_id: string, display_name: string) {
     if (peer_id === '') {
       throw new HttpException('no peer id.', HttpStatus.BAD_REQUEST);
     }
@@ -319,6 +320,7 @@ export class RoomsService {
       const roomAttender = new RoomAttender();
       roomAttender.room = targetRoom;
       roomAttender.peer_id = peer_id;
+      roomAttender.display_name = display_name;
       await this.roomAttenderRepository.save(roomAttender);
 
       const log_output =

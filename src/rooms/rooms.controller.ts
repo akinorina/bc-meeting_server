@@ -80,8 +80,9 @@ export class RoomsController {
   async enter(
     @Body('room_hash') room_hash: string,
     @Body('peer_id') peer_id: string,
+    @Body('display_name') display_name: string,
   ) {
-    return await this.roomsService.enter(room_hash, peer_id);
+    return await this.roomsService.enter(room_hash, peer_id, display_name);
   }
 
   // Roomから退室
