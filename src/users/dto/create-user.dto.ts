@@ -28,4 +28,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   password: string;
+
+  @IsNotEmpty()
+  agreeTerms: string;
 }

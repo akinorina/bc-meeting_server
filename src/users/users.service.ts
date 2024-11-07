@@ -15,6 +15,7 @@ import { VerifyingEmail } from './entities/verify-email.entity';
 import { Role } from 'src/roles/entities/role.entity';
 import { ERoles } from 'src/enumerates/roles.enum';
 import configuration from 'src/config/configuration';
+import { application } from '../log/logger';
 
 export interface SmtpConfig {
   host: string;
@@ -273,7 +274,12 @@ export class UsersService {
     user.setValueByCreateUserDto(createUserDto);
     user.verifying_email = verifiedEmail;
     user.roles = [role];
-    const resultUser = this.userRepository.save(user);
+    const responseUser = await this.userRepository.save(user);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, verifying_email, roles, ...resultUser } = responseUser;
+
+    // Sign-up user ログ
+    application.info('sign-up_user', 'sign-up: ' + JSON.stringify(resultUser));
 
     return resultUser;
   }
