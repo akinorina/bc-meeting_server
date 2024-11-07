@@ -11,6 +11,7 @@ import { RoomAttender } from './entities/room_attender.entity';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { InviteToRoomDto } from './dto/invite-to-room.dto';
+import { application } from '../log/logger';
 
 @Injectable()
 export class RoomsService {
@@ -51,7 +52,34 @@ export class RoomsService {
       room_hash: roomHash,
       room_name: createRoomDto.room_name,
     };
-    return await this.roomRepository.save(roomData);
+    const resultRoom = await this.roomRepository.save(roomData);
+
+    // room ログ
+    const log_output =
+      'room id:' +
+      resultRoom.id +
+      ' / room name:' +
+      resultRoom.room_name +
+      ' / room hash:' +
+      resultRoom.room_hash +
+      ' / user id:' +
+      resultRoom.user.id +
+      ' / user username:' +
+      resultRoom.user.username +
+      ' / user name:' +
+      resultRoom.user.familyname +
+      resultRoom.user.firstname +
+      ' / user email:' +
+      resultRoom.user.email +
+      ' / room createdAt:' +
+      resultRoom.createdAt +
+      ' / room updatedAt:' +
+      resultRoom.updatedAt +
+      ' / room deletedAt:' +
+      resultRoom.deletedAt;
+    application.info('room', 'create a room: ' + log_output);
+
+    return resultRoom;
   }
 
   async findAll(req: any) {
@@ -110,7 +138,46 @@ export class RoomsService {
   }
 
   async remove(id: number) {
-    return this.roomRepository.softDelete(+id);
+    try {
+      // Room情報取得
+      const options: any = {
+        relations: { user: true, room_attenders: true },
+        where: { id: id },
+      };
+      const resultRoom = await this.roomRepository.findOneOrFail(options);
+
+      // Room削除
+      const deletedRoom = await this.roomRepository.softDelete(+id);
+
+      // room ログ
+      const log_output =
+        'room id:' +
+        resultRoom.id +
+        ' / room name:' +
+        resultRoom.room_name +
+        ' / room hash:' +
+        resultRoom.room_hash +
+        ' / user id:' +
+        resultRoom.user.id +
+        ' / user username:' +
+        resultRoom.user.username +
+        ' / user name:' +
+        resultRoom.user.familyname +
+        resultRoom.user.firstname +
+        ' / user email:' +
+        resultRoom.user.email +
+        ' / room createdAt:' +
+        resultRoom.createdAt +
+        ' / room updatedAt:' +
+        resultRoom.updatedAt +
+        ' / room deletedAt:' +
+        resultRoom.deletedAt;
+      application.info('room', 'remove the room: ' + log_output);
+
+      return deletedRoom;
+    } catch (error) {
+      throw new HttpException('no such the Room data.', HttpStatus.NOT_FOUND);
+    }
   }
 
   // Room への招待メールを送信
@@ -189,6 +256,17 @@ export class RoomsService {
       html: toCustomerHtml,
     });
 
+    const log_output =
+      'room name: ' +
+      mailOption.room_name +
+      ' / room hash: ' +
+      mailOption.room_hash +
+      ' / room url: ' +
+      mailOption.room_url +
+      ' / mail to: ' +
+      mailOption.mail_to;
+    application.info('room', 'sent a inviting e-mail: ' + log_output);
+
     // 成功レスポンス
     return { status: 'success' };
   }
@@ -242,6 +320,15 @@ export class RoomsService {
       roomAttender.room = targetRoom;
       roomAttender.peer_id = peer_id;
       await this.roomAttenderRepository.save(roomAttender);
+
+      const log_output =
+        'room id: ' +
+        roomAttender.room.id +
+        ' / room name: ' +
+        roomAttender.room.room_name +
+        ' / room hash: ' +
+        roomAttender.room.room_hash;
+      application.info('room', 'enter the room: ' + log_output);
     }
 
     return { status: 'success' };
@@ -265,6 +352,15 @@ export class RoomsService {
       // Room - 出席者 データの関係を削除
       const targetAttender = targetRoom.room_attenders[targetAttenderIdx];
       this.roomAttenderRepository.delete(targetAttender.id);
+
+      const log_output =
+        'room id: ' +
+        targetRoom.id +
+        ' / room name: ' +
+        targetRoom.room_name +
+        ' / room hash: ' +
+        targetRoom.room_hash;
+      application.info('room', 'exit the room: ' + log_output);
 
       // // 出席者データ削除
       // targetRoom.room_attenders.splice(targetAttenderIdx, 1);
