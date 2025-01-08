@@ -6,7 +6,8 @@ module.exports = {
       cwd: '.',
       max_memory_restart: '512M',
       exec_mode: 'cluster',
-      instances: 2,
+      instances: 'max',
+      instance_var: 'BC-MEETING_SERVER_ID',
       watch: ['./dist/*.js'],
       ignore_watch: ['node_modules'],
       env_production: {

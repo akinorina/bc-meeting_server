@@ -55,4 +55,6 @@ export default {
       level: 'ALL',
     },
   },
+  pm2: true,
+  pm2InstanceVar: 'BC-MEETING_SERVER_ID',
 };
