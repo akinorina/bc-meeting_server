@@ -65,4 +65,9 @@ export default () => ({
     bucketName: process.env.STORAGE_BUCKET_NAME,
     pathPrefix: process.env.STORAGE_PATH_PREFIX,
   },
+  stripe: {
+    publishable_key: process.env.STRIPE_PUBLISHABLE_KEY,
+    secret_key: process.env.STRIPE_SECRET_KEY,
+    webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+  },
 });

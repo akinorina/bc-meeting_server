@@ -2,6 +2,7 @@ import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
+import { application } from 'src/log/logger';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
 
   @Get('profile')
   getProfile(@Request() req) {
+    application.debug('logs1', req.user);
     return req.user;
   }
 }

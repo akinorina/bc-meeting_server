@@ -12,6 +12,7 @@ import { RolesGuard } from 'src/roles/roles.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { BlogsModule } from './blogs/blogs.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RoomsModule } from './rooms/rooms.module';
     ImagesModule,
     BlogsModule,
     RoomsModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [

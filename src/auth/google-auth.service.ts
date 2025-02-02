@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { application } from '../log/logger';
 
 @Injectable()
 export class GoogleAuthService {
@@ -46,9 +47,12 @@ export class GoogleAuthService {
     });
     const payload = {
       username: targetUser.username,
+      email: req.user.email,
       sub: targetUser.id,
       roles: roles,
     };
+    application.debug(payload);
+
     return this.jwtService.sign(payload);
   }
 }
